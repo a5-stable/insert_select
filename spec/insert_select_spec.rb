@@ -11,6 +11,10 @@ RSpec.describe InsertSelect do
 
   describe "without where condition" do
     binding.irb
+    User.create!
+    User.create!
+
+    DupUser.insert_select_from(User.all.select(:name))
   end
 
   describe "with where condition" do

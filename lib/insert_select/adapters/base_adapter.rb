@@ -7,13 +7,17 @@ module InsertSelect
       end
 
       def insert_select_from(relation)
-        connection.execute(to_sql(relation))
+        @connection.execute(to_sql(relation))
       end
 
+      private
+
       def to_sql(relation)
-        quoted_table_name = connection.quote_table_name(table_name)
+        columns = relation.select_values.map {|column| @connection.quote_column_name(column)}
+        quoted_table_name = @connection.quote_table_name(@table_name)
+
         stmt = "INSERT INTO #{quoted_table_name} "
-        stmt += source.to_sql
+        stmt += relation.to_sql
       end
     end
   end

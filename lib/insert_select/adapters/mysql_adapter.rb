@@ -6,7 +6,7 @@ module InsertSelect
       end
 
       def insert_select_from(relation, options = {})
-
+        super
       end
     end
   end
