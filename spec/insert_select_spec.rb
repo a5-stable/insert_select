@@ -29,5 +29,14 @@ RSpec.describe InsertSelect do
     it "can filter data by where clause" do
       NewUser.insert_select_from(OldUser.where("age > 20"))
     end
+
+    it "raises error when a number of column is different" do
+    end
+
+    it "raises error when a type of column is different" do
+    end
+
+    it "raises error when a column does not exists in mapping" do
+    end
   end
 end
