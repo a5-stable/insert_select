@@ -19,11 +19,11 @@ RSpec.describe InsertSelect do
     end
 
     it "can copy data with column mapping" do
-      NewEmployee.insert_select_from(OldUser.all, mapping: {name: :full_name})
+      NewEmployee.insert_select_from(OldUser.select(:name, :age).all, mapping: {name: :full_name})
     end
 
     it "can specify constant value in mapping" do
-      NewEmployee.insert_select_from(OldUser.all, mapping: {active: true})
+      NewEmployee.insert_select_from(OldUser.select(:name, :age).all, mapping: {active: true})
     end
 
     it "can filter data by where clause" do

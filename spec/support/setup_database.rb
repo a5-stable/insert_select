@@ -13,7 +13,7 @@ class CreateAllTables < ActiveRecord::Migration[7.0]
       t.integer :age
     end
 
-    create_table(:new_employee) do |t|
+    create_table(:new_employees) do |t|
       t.string :full_name
       t.string :email
       t.boolean :active

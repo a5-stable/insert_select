@@ -10,9 +10,9 @@ module InsertSelect
 
     included do
       class << self
-        def insert_select_from(relation)
+        def insert_select_from(relation, options = {})
           adapter = find_adapter(connection)
-          adapter.insert_select_from(relation)
+          adapter.insert_select_from(relation, options)
         end
 
         private
