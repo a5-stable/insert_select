@@ -13,16 +13,28 @@ module InsertSelect
       private
 
       def to_sql(relation, options)
-        select_values = relation.select_values
-        columns = relation.select_values.map {|column|
-          name = options[:mapping] && options[:mapping][column] || column
-          @connection.quote_column_name(name)
-        }
-        quoted_table_name = @connection.quote_table_name(@table_name)
+        mapping = options[:mapping] || {}
+        selected_column_names = relation.select_values
+        mapping_column_names = mapping.keys
+        columns = []
 
-        binding.irb
+        selected_column_names.each do |column_name|
+          if mapping[column_name] && mapping[column_name].is_a?(Symbol)
+            columns << mapping[column_name]
+            mapping_column_names.delete(column_name)
+          else
+            columns << column_name
+          end
+        end
+
+        mapping_column_names.each do |column_name|
+          columns << column_name
+          relation = relation.select(:"#{mapping[column_name]}")
+        end
+
+        quoted_table_name = @connection.quote_table_name(@table_name)
         stmt = "INSERT INTO #{quoted_table_name} "
-        stmt += "(#{columns.join(', ')}) " if columns.present?
+        stmt += "(#{columns.uniq.join(', ')}) " if columns.present?
         stmt += relation.to_sql
       end
     end
