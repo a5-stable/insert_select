@@ -32,7 +32,9 @@ module InsertSelect
           relation = relation.select(:"#{mapping[column_name]}")
         end
 
+        columns = columns.map {|c| @connection.quote_column_name(c)}
         quoted_table_name = @connection.quote_table_name(@table_name)
+
         stmt = "INSERT INTO #{quoted_table_name} "
         stmt += "(#{columns.uniq.join(', ')}) " if columns.present?
         stmt += relation.to_sql
