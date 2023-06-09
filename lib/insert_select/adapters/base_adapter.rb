@@ -1,5 +1,7 @@
 module InsertSelect
   module Adapters
+    require "insert_select/errors"
+
     class BaseAdapter
       def initialize(table_name, connection)
         @table_name = table_name
@@ -16,6 +18,15 @@ module InsertSelect
         mapping = options[:mapping] || {}
         selected_column_names = relation.select_values
         mapping_column_names = mapping.keys
+
+        if selected_column_names.blank? && @connection.columns(@table_name).size != @connection.columns(relation.table_name).size
+          raise InsertSelect::ColumnCountMisMatchError.new("hello")
+        end
+
+        if selected_column_names.present? && selected_column_names.size != mapping_column_names.size
+          raise InsertSelect::ColumnCountMisMatchError.new("hello")
+        end
+
         columns = []
 
         selected_column_names.each do |column_name|
