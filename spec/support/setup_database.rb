@@ -49,3 +49,18 @@ end
 
 class NewUserWithDifferentColumn < ActiveRecord::Base
 end
+
+def prepare_data
+  data = [
+    {name: "Dave", age: 20},
+    {name: "Dee", age: 30},
+    {name: "Dozy", age: 40},
+    {name: "Beaky", age: 50},
+    {name: "Mick", age: 60},
+    {name: "Tich", age: 70},
+  ]
+
+  OldUser.insert_all(data)
+end
+
+prepare_data

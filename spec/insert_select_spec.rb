@@ -6,7 +6,11 @@ RSpec.describe InsertSelect do
     @connection.schema_cache.clear!
   end
 
-  def teardown
+  after(:each) do
+    NewUserWithDifferentColumn.delete_all
+    NewUserWithDifferentColumnName.delete_all
+    NewUserWithExtraColumn.delete_all
+    NewUserWithSameColumn.delete_all
   end
 
   # create_table(:old_users) do |t|
@@ -39,18 +43,28 @@ RSpec.describe InsertSelect do
   describe "select insert" do
     it "can copy all data with class" do
       NewUserWithSameColumn.insert_select_from(OldUser)
+
+      expect(NewUserWithSameColumn.count).to eq(6)
     end
 
     it "only select" do
       NewUserWithSameColumn.insert_select_from(OldUser.select(:name).all)
+
+      expect(NewUserWithSameColumn.count).to eq(6)
+      expect(NewUserWithSameColumn.pluck(:age)).to eq(Array.new(6, nil))
     end
 
     it "only mapping" do
       NewUserWithDifferentColumnName.insert_select_from(OldUser, mapping: {name: :full_name})
+
+      expect(NewUserWithSameColumn.count).to eq(6)
     end
 
     it "select & mapping" do
       NewUserWithDifferentColumnName.insert_select_from(OldUser.select(:name).all, mapping: {name: :full_name})
+
+      expect(NewUserWithSameColumn.count).to eq(6)
+      expect(NewUserWithSameColumn.pluck(:age)).to eq(Array.new(6, nil))
     end
 
     it "only constant" do
