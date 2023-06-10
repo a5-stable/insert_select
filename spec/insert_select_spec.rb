@@ -11,7 +11,7 @@ RSpec.describe InsertSelect do
 
   describe "select insert" do
     it "can copy all data from old_users to new_users" do
-      NewUser.insert_select_from(OldUser.all)
+      NewUser.insert_select_from(OldUser)
     end
 
     it "can select column which can be copied" do
@@ -19,11 +19,11 @@ RSpec.describe InsertSelect do
     end
 
     it "can copy data with column mapping" do
-      NewEmployee.insert_select_from(OldUser.select(:name).all, mapping: {name: :full_name})
+      NewEmployee.insert_select_from(OldUser.select(:name).all, mapping: {full_name: :name, active: true})
     end
 
     it "can specify constant value in mapping" do
-      NewEmployee.insert_select_from(OldUser.select(:name).all, mapping: {name: :full_name, active: true})
+      NewEmployee.insert_select_from(OldUser.select(:name).all, mapping: {full_name: :name, active: true})
     end
 
     it "can filter data by where clause" do
@@ -31,6 +31,11 @@ RSpec.describe InsertSelect do
     end
 
     it "raises error when a number of column is different" do
+      NewEmployee.insert_select_from(OldUser.all)
+    end
+
+    it "raises error when a number of column is different with select" do
+      NewEmployee.insert_select_from(OldUser.select(:name, :age).all)
     end
 
     it "raises error when a type of column is different" do
