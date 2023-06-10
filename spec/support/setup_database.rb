@@ -8,12 +8,23 @@ class CreateAllTables < ActiveRecord::Migration[7.0]
       t.integer :age
     end
 
-    create_table(:new_users) do |t|
+    create_table(:new_user_with_same_columns) do |t|
       t.string :name
       t.integer :age
     end
 
-    create_table(:new_employees) do |t|
+    create_table(:new_user_with_different_column_names) do |t|
+      t.string :full_name
+      t.integer :age
+    end
+
+    create_table(:new_user_with_extra_columns) do |t|
+      t.string :name
+      t.integer :age
+      t.boolean :active
+    end
+
+    create_table(:new_user_with_different_columns) do |t|
       t.string :full_name
       t.string :email
       t.boolean :active
@@ -27,8 +38,14 @@ CreateAllTables.up
 class OldUser < ActiveRecord::Base
 end
 
-class NewUser < ActiveRecord::Base
+class NewUserWithSameColumn < ActiveRecord::Base
 end
 
-class NewEmployee < ActiveRecord::Base
+class NewUserWithExtraColumn < ActiveRecord::Base
+end
+
+class NewUserWithDifferentColumnName < ActiveRecord::Base
+end
+
+class NewUserWithDifferentColumn < ActiveRecord::Base
 end

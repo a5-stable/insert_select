@@ -9,21 +9,64 @@ RSpec.describe InsertSelect do
   def teardown
   end
 
+  # create_table(:old_users) do |t|
+  #   t.string :name
+  #   t.integer :age
+  # end
+
+  # create_table(:new_users_with_same_columns) do |t|
+  #   t.string :name
+  #   t.integer :age
+  # end
+
+  # create_table(:new_users_with_extra_columns) do |t|
+  #   t.string :name
+  #   t.integer :age
+  #   t.boolean :active
+  # end
+
+  # create_table(:new_users_with_different_column_names) do |t|
+  #   t.string :full_name
+  #   t.integer :age
+  # end
+
+  # create_table(:new_users_with_different_columns) do |t|
+  #   t.string :full_name
+  #   t.string :email
+  #   t.boolean :active
+  # end
+
   describe "select insert" do
-    it "can copy all data from old_users to new_users" do
-      NewUser.insert_select_from(OldUser)
+    it "can copy all data with class" do
+      NewUserWithSameColumn.insert_select_from(OldUser)
     end
 
-    it "can select column which can be copied" do
-      NewUser.insert_select_from(OldUser.select(:name).all)
+    it "only select" do
+      NewUserWithSameColumn.insert_select_from(OldUser.select(:name).all)
     end
 
-    it "can copy data with column mapping" do
-      NewEmployee.insert_select_from(OldUser.select(:name).all, mapping: {full_name: :name, active: true})
+    it "only mapping" do
+      NewUserWithDifferentColumnName.insert_select_from(OldUser, mapping: {name: :full_name})
     end
 
-    it "can specify constant value in mapping" do
-      NewEmployee.insert_select_from(OldUser.select(:name).all, mapping: {full_name: :name, active: true})
+    it "select & mapping" do
+      NewUserWithDifferentColumnName.insert_select_from(OldUser.select(:name).all, mapping: {name: :full_name})
+    end
+
+    it "only constant" do
+      NewUserWithExtraColumn.insert_select_from(OldUser, constant: {active: true})
+    end
+
+    it "select & constant" do
+      NewEmployee.insert_select_from(OldUser.select(:name).all)
+    end
+
+    it "mapping & constant" do
+      NewEmployee.insert_select_from(OldUser.select(:name).all)
+    end
+
+    it "mapping & select & constant" do
+      NewEmployee.insert_select_from(OldUser.select(:name).all)
     end
 
     it "can filter data by where clause" do

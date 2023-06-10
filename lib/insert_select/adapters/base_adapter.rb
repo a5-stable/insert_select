@@ -9,7 +9,7 @@ module InsertSelect
       end
 
       def insert_select_from(relation, options = {})
-        @connection.execute(to_sql(relation, options))
+        @connection.execute(to_sql(relation.all, options))
       end
 
       private
@@ -17,7 +17,7 @@ module InsertSelect
       def to_sql(relation, options)
         mapping = options[:mapping] || {}
         selected_column_names = relation.select_values
-        mapping_column_names = mapping.values
+        mapping_column_names = mapping.keys
 
         if selected_column_names.blank? && @connection.columns(@table_name).size != @connection.columns(relation.table_name).size
           raise InsertSelect::ColumnCountMisMatchError.new("hello")
@@ -25,18 +25,19 @@ module InsertSelect
 
         columns = []
 
-        selected_column_names.each do |column_name|
-          if mapping[column_name] && mapping[column_name].is_a?(Symbol)
-            columns << mapping[column_name]
-            mapping_column_names.delete(column_name)
-          else
-            columns << column_name
+        if selected_column_names.present?
+          selected_column_names.each do |column_name|
+            if mapping[column_name]
+              columns << mapping[column_name]
+              mapping_column_names.delete(column_name)
+            else
+              columns << column_name
+            end
           end
-        end
-
-        mapping_column_names.each do |column_name|
-          columns << column_name
-          relation = relation.select(:"#{mapping[column_name]}")
+        else
+          if mapping_column_names.present?
+            columns += @connection.columns(relation.table_name).map{|c| mapping[c.name.to_sym] || c.name}
+          end
         end
 
         columns = columns.map {|c| @connection.quote_column_name(c)}
