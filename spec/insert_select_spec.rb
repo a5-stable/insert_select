@@ -58,7 +58,8 @@ RSpec.describe InsertSelect do
     it "only mapping" do
       NewUserWithDifferentColumnName.insert_select_from(OldUser, mapping: {name: :full_name})
 
-      expect(NewUserWithSameColumn.count).to eq(6)
+      expect(NewUserWithDifferentColumnName.count).to eq(6)
+      expect(NewUserWithDifferentColumnName.pluck(:full_name)).to eq(["Dave", "Dee", "Dozy", "Beaky", "Mick", "Tich"])
     end
 
     it "select & mapping" do
@@ -78,6 +79,14 @@ RSpec.describe InsertSelect do
       expect(NewUserWithExtraColumn.pluck(:active)).to eq(Array.new(6, true))
     end
 
+    it "constant for exist column" do
+      NewUserWithSameColumn.insert_select_from(OldUser, constant: {name: "Jerry"})
+
+      expect(NewUserWithSameColumn.count).to eq(6)
+      expect(NewUserWithSameColumn.pluck(:name)).to eq(Array.new(6, "Jerry"))
+      expect(NewUserWithSameColumn.pluck(:age)).to eq([20, 30, 40, 50, 60, 70])
+    end
+
     it "select & constant" do
       NewUserWithExtraColumn.insert_select_from(OldUser.select(:name), constant: {active: true})
 
@@ -87,13 +96,24 @@ RSpec.describe InsertSelect do
       expect(NewUserWithExtraColumn.pluck(:active)).to eq(Array.new(6, true))
     end
 
+    it "constant has priority over select" do
+      NewUserWithSameColumn.insert_select_from(OldUser.select(:name), constant: {name: "Jerry"})
+
+      expect(NewUserWithSameColumn.count).to eq(6)
+      expect(NewUserWithSameColumn.pluck(:name)).to eq(Array.new(6, "Jerry"))
+      expect(NewUserWithSameColumn.pluck(:age)).to eq(Array.new(6, nil))
+    end
+
     it "mapping & constant" do
       NewUserWithDifferentColumnName.insert_select_from(OldUser.all, mapping: {name: :full_name}, constant: {age: 30})
-      binding.irb
+
+      expect(NewUserWithDifferentColumnName.count).to eq(6)
+      expect(NewUserWithDifferentColumnName.pluck(:full_name)).to eq(["Dave", "Dee", "Dozy", "Beaky", "Mick", "Tich"])
+      expect(NewUserWithDifferentColumnName.pluck(:age)).to eq(Array.new(6, 30))
     end
 
     it "mapping & select & constant" do
-      NewEmployee.insert_select_from(OldUser.select(:name).all)
+      NewUserWithDifferentColumnName.insert_select_from(OldUser.select(:name).all)
     end
 
     it "can filter data by where clause" do
