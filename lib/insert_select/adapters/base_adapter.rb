@@ -20,10 +20,6 @@ module InsertSelect
         selected_column_names = relation.select_values
         mapping_column_names = mapping.keys
 
-        # if selected_column_names.blank? && @connection.columns(@table_name).size != @connection.columns(relation.table_name).size
-        #   raise InsertSelect::ColumnCountMisMatchError.new("hello")
-        # end
-
         if selected_column_names.present?
           selected_column_names.each do |column_name|
             if mapping[column_name]
