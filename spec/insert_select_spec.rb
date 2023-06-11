@@ -113,11 +113,20 @@ RSpec.describe InsertSelect do
     end
 
     it "mapping & select & constant" do
-      NewUserWithDifferentColumnName.insert_select_from(OldUser.select(:name).all)
+      NewUserWithDifferentColumn.insert_select_from(OldUser.select(:name), mapping: {name: :full_name}, constant: {active: 30})
+
+      expect(NewUserWithDifferentColumn.count).to eq(6)
+      expect(NewUserWithDifferentColumn.pluck(:full_name)).to eq(["Dave", "Dee", "Dozy", "Beaky", "Mick", "Tich"])
+      expect(NewUserWithDifferentColumn.pluck(:email)).to eq(Array.new(6, nil))
+      expect(NewUserWithDifferentColumn.pluck(:active)).to eq(Array.new(6, true))
     end
 
     it "can filter data by where clause" do
-      NewUser.insert_select_from(OldUser.where("age > 20"))
+      NewUserWithSameColumn.insert_select_from(OldUser.where(age: 20))
+
+      expect(NewUserWithSameColumn.count).to eq(1)
+      expect(NewUserWithSameColumn.first.name).to eq("Dave")
+      expect(NewUserWithSameColumn.first.age).to eq(20)
     end
 
     it "raises error when a number of column is different" do
