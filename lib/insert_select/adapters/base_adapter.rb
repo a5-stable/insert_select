@@ -8,14 +8,11 @@ module InsertSelect
         @connection = connection
       end
 
-      def insert_select_from(relation, options = {})
-        @connection.execute(to_sql(relation.all, options))
-      end
+      def build_sql(insert_select_from)
+        mapping = insert_select_from.mapping || {}
+        constant = insert_select_from.constant || {}
+        relation = insert_select_from.relation
 
-      private
-
-      def to_sql(relation, options)
-        mapping = options[:mapping] || {}
         insert_mapping = mapping.transform_keys(&:to_s)
         selected_column_names = relation.select_values
         mapping_column_names = mapping.keys
@@ -37,14 +34,14 @@ module InsertSelect
           }
         end
 
-        if options[:constant].present?
+        if constant.present?
           if insert_mapping.blank?
             @connection.columns(relation.table_name).map{|c|
               insert_mapping[c.name.to_s] = c.name
             }
           end
 
-          options[:constant].each {|k, v|
+          constant.each {|k, v|
             insert_mapping.delete(k.to_s)
             relation.select_values = relation.select_values - [k.to_sym]
             insert_mapping["\"#{v}\""] = k
@@ -67,7 +64,6 @@ module InsertSelect
           stmt = "INSERT INTO #{quoted_table_name} #{relation.to_sql}"
         end
 
-        puts stmt
         stmt
       end
     end
