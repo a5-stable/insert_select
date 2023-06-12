@@ -1,7 +1,8 @@
 module InsertSelect
   module Adapters
     class MysqlAdapter < BaseAdapter
-      def initialize(connection)
+      def initialize(table_name, connection)
+        @table_name = table_name
         @connection = connection
       end
 
