@@ -11,7 +11,7 @@ module InsertSelect
     included do
       class << self
         def insert_select_from(relation, options = {})
-          InsertSelect::ActiveRecord::InsertSelectFrom.new(self, relation, mapping: {}, constant: {}, returning: nil, record_timestamps: nil).execute
+          InsertSelect::ActiveRecord::InsertSelectFrom.new(self, relation, mapping: options[:mapping], constant: options[:constant], returning: nil, record_timestamps: nil).execute
         end
       end
     end
@@ -24,6 +24,10 @@ module InsertSelect
         @connection = model.connection
         @relation = relation
         @adapter = find_adapter(connection)
+        @mapping = mapping
+        @constant = constant
+        @returning = returning
+        @record_timestamps = record_timestamps
       end
 
       def to_sql

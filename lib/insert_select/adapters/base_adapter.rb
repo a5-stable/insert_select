@@ -11,7 +11,7 @@ module InsertSelect
       def build_sql(insert_select_from)
         mapping = insert_select_from.mapping || {}
         constant = insert_select_from.constant || {}
-        relation = insert_select_from.relation
+        relation = insert_select_from.relation.all
 
         insert_mapping = mapping.transform_keys(&:to_s)
         selected_column_names = relation.select_values
