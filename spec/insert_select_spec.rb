@@ -63,6 +63,9 @@ RSpec.describe InsertSelect do
     end
 
     it "select & mapping" do
+      binding.irb
+      ActiveRecord::Base.logger = Logger.new(STDOUT)
+
       NewUserWithDifferentColumnName.insert_select_from(OldUser.select(:name).all, mapping: {name: :full_name})
 
       expect(NewUserWithDifferentColumnName.count).to eq(6)

@@ -10,31 +10,16 @@ module InsertSelect
       end
 
       def build_sql(builder)
-        relation = builder.relation.all
-        mapper = builder.mapper
-        insert_mapping = mapper[:insert_mapping]
-        constant_mapping = mapper[:constant_mapping]
+        insert_mapping = builder.insert_mapping
+        constant_mapping = builder.constant_mapping
         quoted_table_name = @connection.quote_table_name(table_name)
+        relation_sql = builder.relation_sql
 
-        if insert_mapping.present? || constant_mapping.present?
-          c = []
-          insert_mapping.each {|k, v|
-            c << v
-            relation = relation.select(k.to_s) if builder.selected_column_names.map(&:to_s).exclude?(k.to_s)
-          }
-
-          constant_mapping.each {|k, v|
-            c << k
-            relation.select_values = relation.select_values - [k.to_sym]
-            relation = relation.select(v)
-          }
-          stmt = "INSERT INTO #{quoted_table_name} "
-          stmt += "(#{c.join(', ')}) "
-          stmt += relation.to_sql
-
-          stmt
+        if builder.into.present?
+          stmt = "INSERT #{builder.into}"
+          stmt += " #{relation_sql}"
         else
-          stmt = "INSERT INTO #{quoted_table_name} #{relation.to_sql}"
+          stmt = "INSERT INTO #{quoted_table_name} #{relation_sql}"
         end
 
         stmt
