@@ -31,11 +31,16 @@ module InsertSelect
       end
 
       def to_sql
-        adapter.build_sql(Builder.new(self))
+        @to_sql ||= adapter.build_sql(builder)
       end
 
       def execute
-        connection.execute(to_sql)
+        sql = model.sanitize_sql_array([to_sql, *builder.constant_values])
+        connection.execute(sql)
+      end
+
+      def builder
+        @builder ||= Builder.new(self)
       end
 
       private
@@ -55,7 +60,7 @@ module InsertSelect
       end
 
       class Builder
-        attr_reader :relation, :constant, :mapping, :returning, :record_timestamps, :model
+        attr_reader :relation, :constant, :mapping, :returning, :record_timestamps, :model, :constant_values
 
         def initialize(insert_select_from)
           @relation = insert_select_from.relation.all;
@@ -65,6 +70,7 @@ module InsertSelect
           @record_timestamps = insert_select_from.record_timestamps
           @connection = insert_select_from.connection
           @model = insert_select_from.model
+          @constant_values = @constant.values
         end
 
         def mapper
@@ -132,11 +138,10 @@ module InsertSelect
 
           constant_mapping.each {|k, v|
             c << k
+            relation._select!("?")
             remove_select_values!(k)
-            relation._select!(v)
           }
 
-          # TODO:: to be escaped
           "INTO #{model.quoted_table_name} (#{c.join(', ')})"
         end
 
