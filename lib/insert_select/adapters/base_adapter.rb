@@ -13,10 +13,11 @@ module InsertSelect
         insert_mapping = builder.insert_mapping
         constant_mapping = builder.constant_mapping
         quoted_table_name = @connection.quote_table_name(table_name)
+        into = builder.into
         relation_sql = builder.relation_sql
 
-        if builder.into.present?
-          stmt = "INSERT #{builder.into}"
+        if into.present?
+          stmt = "INSERT #{into}"
           stmt += " #{relation_sql}"
         else
           stmt = "INSERT INTO #{quoted_table_name} #{relation_sql}"
