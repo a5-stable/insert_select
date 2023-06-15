@@ -12,15 +12,16 @@ module InsertSelect
       def build_sql(builder)
         insert_mapping = builder.insert_mapping
         constant_mapping = builder.constant_mapping
-        quoted_table_name = @connection.quote_table_name(table_name)
         into = builder.into
-        relation_sql = builder.relation_sql
 
         if into.present?
+          builder.reselect_relation!
+
           stmt = "INSERT #{into}"
-          stmt += " #{relation_sql}"
+          stmt += " #{builder.relation_sql}"
         else
-          stmt = "INSERT INTO #{quoted_table_name} #{relation_sql}"
+          quoted_table_name = @connection.quote_table_name(table_name)
+          stmt = "INSERT INTO #{quoted_table_name} #{builder.relation_sql}"
         end
 
         stmt
