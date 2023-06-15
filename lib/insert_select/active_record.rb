@@ -11,23 +11,21 @@ module InsertSelect
     included do
       class << self
         def insert_select_from(relation, options = {})
-          InsertSelect::ActiveRecord::InsertSelectFrom.new(self, relation, mapping: options[:mapping], constant: options[:constant], returning: nil, record_timestamps: nil).execute
+          InsertSelect::ActiveRecord::InsertSelectFrom.new(self, relation, mapping: options[:mapping], constant: options[:constant]).execute
         end
       end
     end
 
     class InsertSelectFrom
-      attr_reader :model, :connection, :relation, :adapter, :mapping, :constant, :returning, :record_timestamps
+      attr_reader :model, :connection, :relation, :adapter, :mapping, :constant
 
-      def initialize(model, relation, mapping:, constant:, returning:, record_timestamps:)
+      def initialize(model, relation, mapping:, constant:)
         @model = model
         @connection = model.connection
         @relation = relation
         @adapter = find_adapter(connection)
         @mapping = mapping
         @constant = constant
-        @returning = returning
-        @record_timestamps = record_timestamps
       end
 
       def to_sql
@@ -41,6 +39,18 @@ module InsertSelect
 
       def builder
         @builder ||= Builder.new(self)
+      end
+
+      def update_duplicates?
+        on_duplicate == :update
+      end
+
+      def update_duplicates?
+        on_duplicate == :update
+      end
+
+      def record_timestamps?
+        @record_timestamps
       end
 
       private
@@ -60,15 +70,13 @@ module InsertSelect
       end
 
       class Builder
-        attr_reader :relation, :constant, :mapping, :returning, :record_timestamps, :model, :constant_values
+        attr_reader :relation, :constant, :mapping, :model, :constant_values
 
         def initialize(insert_select_from)
-          @relation = insert_select_from.relation.all;
+          @connection = insert_select_from.connection
+          @relation = insert_select_from.relation.all
           @constant = insert_select_from.constant || {}
           @mapping = insert_select_from.mapping || {}
-          @returning = insert_select_from.returning
-          @record_timestamps = insert_select_from.record_timestamps
-          @connection = insert_select_from.connection
           @model = insert_select_from.model
           @constant_values = @constant.values
         end
@@ -147,6 +155,16 @@ module InsertSelect
 
         def relation_sql
           relation.to_sql
+        end
+
+        def touch_model_timestamps_unless(&block)
+          return "" unless update_duplicates? && record_timestamps?
+
+          model.timestamp_attributes_for_update_in_model.filter_map do |column_name|
+            if touch_timestamp_attribute?(column_name)
+              "#{column_name}=(CASE WHEN (#{updatable_columns.map(&block).join(" AND ")}) THEN #{model.quoted_table_name}.#{column_name} ELSE #{connection.high_precision_current_timestamp} END),"
+            end
+          end.join
         end
 
         private
