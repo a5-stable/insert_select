@@ -18,15 +18,16 @@ module InsertSelect
     end
 
     class InsertSelectFrom
-      attr_reader :model, :connection, :relation, :adapter, :mapping, :constant
+      attr_reader :model, :connection, :relation, :adapter, :mapping, :constant, :returning
 
-      def initialize(model, relation, mapping:, constant:)
+      def initialize(model, relation, mapping:, constant:, returning: nil)
         @model = model
         @connection = model.connection
         @relation = relation
         @adapter = find_adapter(connection)
         @mapping = mapping
         @constant = constant
+        @returning = returning
       end
 
       def execute
@@ -40,6 +41,12 @@ module InsertSelect
 
       def builder
         @builder ||= Builder.new(self)
+      end
+
+      def ensure_valid_options_for_connection!
+        if returning && !connection.supports_insert_returning?
+          raise ArgumentError, "#{connection.class} does not support :returning"
+        end
       end
 
       private

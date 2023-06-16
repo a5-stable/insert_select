@@ -128,19 +128,5 @@ RSpec.describe InsertSelect do
       expect(NewUserWithSameColumn.first.name).to eq("Dave")
       expect(NewUserWithSameColumn.first.age).to eq(20)
     end
-
-    # it "raises error when a number of column is different" do
-    #   expect { NewUserWithExtraColumn.insert_select_from(OldUser.all) }.to raise_error(InsertSelect::ColumnCountMisMatchError)
-    # end
-
-    # it "raises error when a number of column is different with select" do
-    #   NewUserWithSameColumn.insert_select_from(NewUserWithExtraColumn.select(:name, :age, :active))
-    # end
-
-    # it "raises error when a type of column is different" do
-    # end
-
-    # it "raises error when a column does not exists in mapping" do
-    # end
   end
 end
