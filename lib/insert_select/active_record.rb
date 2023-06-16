@@ -29,13 +29,13 @@ module InsertSelect
         @constant = constant
       end
 
-      def to_sql
-        @to_sql ||= adapter.build_sql(builder)
-      end
-
       def execute
         sql = model.sanitize_sql_array([to_sql, *builder.constant_values])
         connection.execute(sql)
+      end
+
+      def to_sql
+        @to_sql ||= adapter.build_sql(builder)
       end
 
       def builder
