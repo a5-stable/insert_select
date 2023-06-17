@@ -14,6 +14,10 @@ module InsertSelect
         def insert_select_from(relation, options = {})
           InsertSelect::ActiveRecord::InsertSelectFrom.new(self, relation, mapping: options[:mapping], constant: options[:constant]).execute
         end
+
+        def except(*columns)
+          select( column_names - columns.map(&:to_s) )
+        end
       end
     end
 

@@ -41,13 +41,13 @@ RSpec.describe InsertSelect do
   # end
 
   describe "select insert" do
-    it "can copy all data with class" do
+    it "can copy all data with class name" do
       NewUserWithSameColumn.insert_select_from(OldUser)
 
       expect(NewUserWithSameColumn.count).to eq(6)
     end
 
-    it "only select" do
+    it "can select specific columns to be copied" do
       NewUserWithSameColumn.insert_select_from(OldUser.select(:name).all)
 
       expect(NewUserWithSameColumn.count).to eq(6)
@@ -55,14 +55,21 @@ RSpec.describe InsertSelect do
       expect(NewUserWithSameColumn.pluck(:age)).to eq(Array.new(6, nil))
     end
 
-    it "only mapping" do
+    it "can exclude specific columns to be copied by using except" do
+      NewUserWithSameColumn.insert_select_from(OldUser.except(:id).all)
+      NewUserWithSameColumn.insert_select_from(OldUser.except(:id).all) # not raise error because id is not unique
+
+      expect(NewUserWithSameColumn.count).to eq(12)
+    end
+
+    it "can copy data with different column name by mapping" do
       NewUserWithDifferentColumnName.insert_select_from(OldUser, mapping: {name: :full_name})
 
       expect(NewUserWithDifferentColumnName.count).to eq(6)
       expect(NewUserWithDifferentColumnName.pluck(:full_name)).to eq(["Dave", "Dee", "Dozy", "Beaky", "Mick", "Tich"])
     end
 
-    it "select & mapping" do
+    it "can copy data with different column name by mapping with select clause" do
       NewUserWithDifferentColumnName.insert_select_from(OldUser.select(:name).all, mapping: {name: :full_name})
 
       expect(NewUserWithDifferentColumnName.count).to eq(6)
@@ -70,7 +77,7 @@ RSpec.describe InsertSelect do
       expect(NewUserWithDifferentColumnName.pluck(:age)).to eq(Array.new(6, nil))
     end
 
-    it "only constant" do
+    it "can copy data with constant value" do
       NewUserWithExtraColumn.insert_select_from(OldUser, constant: {active: true})
 
       expect(NewUserWithExtraColumn.count).to eq(6)
@@ -79,7 +86,7 @@ RSpec.describe InsertSelect do
       expect(NewUserWithExtraColumn.pluck(:active)).to eq(Array.new(6, true))
     end
 
-    it "constant for exist column" do
+    it "can overwrite data with constant value" do
       NewUserWithSameColumn.insert_select_from(OldUser, constant: {name: "Jerry"})
 
       expect(NewUserWithSameColumn.count).to eq(6)
@@ -87,7 +94,7 @@ RSpec.describe InsertSelect do
       expect(NewUserWithSameColumn.pluck(:age)).to eq([20, 30, 40, 50, 60, 70])
     end
 
-    it "select & constant" do
+    it "can copy data with constant value and select clause" do
       NewUserWithExtraColumn.insert_select_from(OldUser.select(:name), constant: {active: true})
 
       expect(NewUserWithExtraColumn.count).to eq(6)
@@ -96,7 +103,7 @@ RSpec.describe InsertSelect do
       expect(NewUserWithExtraColumn.pluck(:active)).to eq(Array.new(6, true))
     end
 
-    it "constant has priority over select" do
+    it "can copy data with constant value" do
       NewUserWithSameColumn.insert_select_from(OldUser.select(:name), constant: {name: "Jerry"})
 
       expect(NewUserWithSameColumn.count).to eq(6)
@@ -104,7 +111,7 @@ RSpec.describe InsertSelect do
       expect(NewUserWithSameColumn.pluck(:age)).to eq(Array.new(6, nil))
     end
 
-    it "mapping & constant" do
+    it "can copy data with constant value and mapping" do
       NewUserWithDifferentColumnName.insert_select_from(OldUser.all, mapping: {name: :full_name}, constant: {age: 30})
 
       expect(NewUserWithDifferentColumnName.count).to eq(6)
@@ -112,7 +119,7 @@ RSpec.describe InsertSelect do
       expect(NewUserWithDifferentColumnName.pluck(:age)).to eq(Array.new(6, 30))
     end
 
-    it "mapping & select & constant" do
+    it "can copy data with constant value, mapping and select clause" do
       NewUserWithDifferentColumn.insert_select_from(OldUser.select(:name), mapping: {name: :full_name}, constant: {active: 30})
 
       expect(NewUserWithDifferentColumn.count).to eq(6)
@@ -121,7 +128,7 @@ RSpec.describe InsertSelect do
       expect(NewUserWithDifferentColumn.pluck(:active)).to eq(Array.new(6, true))
     end
 
-    it "can filter data by where clause" do
+    it "can filter data to be copied by where clause" do
       NewUserWithSameColumn.insert_select_from(OldUser.where(age: 20))
 
       expect(NewUserWithSameColumn.count).to eq(1)
