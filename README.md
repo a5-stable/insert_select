@@ -1,24 +1,66 @@
 # InsertSelect
 
-TODO: Delete this and the text below, and describe your gem
-
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/insert_select`. To experiment with that code, run `bin/console` for an interactive prompt.
+This is a custom gem that extends ActiveRecord to enable the expression of SQL `INSERT INTO SELECT...` queries in a more convenient way.   
+It allows you to copy data from one table to another based on specified conditions using a simple and expressive syntax.
 
 ## Installation
 
-TODO: Replace `UPDATE_WITH_YOUR_GEM_NAME_PRIOR_TO_RELEASE_TO_RUBYGEMS_ORG` with your gem name right after releasing it to RubyGems.org. Please do not do it earlier due to security reasons. Alternatively, replace this section with instructions to install your gem from git if you don't plan to release to RubyGems.org.
+Add this line to your Gemfile:  
 
-Install the gem and add to the application's Gemfile by executing:
-
-    $ bundle add UPDATE_WITH_YOUR_GEM_NAME_PRIOR_TO_RELEASE_TO_RUBYGEMS_ORG
-
-If bundler is not being used to manage dependencies, install the gem by executing:
-
-    $ gem install UPDATE_WITH_YOUR_GEM_NAME_PRIOR_TO_RELEASE_TO_RUBYGEMS_ORG
-
+```ruby
+gem 'insert_select'
+```
+  
+And then execute:
+```ruby
+bundle install
+```
+  
+Or install it yourself as:
+```ruby
+gem install insert_select
+```
+  
 ## Usage
 
-TODO: Write usage instructions here
+### Copy all data from OldUser to NewUser
+
+```ruby
+NewUser.insert_select_from(OldUser)
+
+#=> INSERT INTO "new_users" SELECT "old_users".* FROM "old_users"
+```
+
+### Filter the columns to be copied
+
+```ruby
+NewUser.insert_select_from(OldUser.select(:name))
+
+#=> INSERT INTO "new_users" ("name") SELECT "old_users"."name" FROM "old_users"
+```
+
+### Copy data between different column names
+
+You can specify column name mapping between tables.
+```ruby
+AnotherUser.insert_select_from(OldUser, mapping: { old_name: :another_name })
+
+#=> INSERT INTO "another_users" ("another_name") SELECT "old_users"."name" FROM "old_users"
+```
+
+### Set constant value
+```ruby
+AnotherUser.insert_select_from(OldUser, mapping: { old_name: :another_name }, constant: { another_constant_column: "20" })
+
+#=> INSERT INTO "another_users" ("another_name", "another_constant_column") SELECT "old_users"."name", "20" FROM "old_users"
+```
+
+### Use Where clause 
+```ruby
+NewUser.insert_select_from(OldUser.where("age > ?", 20))
+
+#=> INSERT INTO "new_users" SELECT "old_users".*, FROM "old_users" WHERE ("age" > 20)
+```
 
 ## Development
 
