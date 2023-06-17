@@ -1,6 +1,13 @@
 # InsertSelect
 
-This is a custom gem that extends ActiveRecord to enable the expression of SQL `INSERT INTO SELECT...` queries in a more convenient way. It allows you to copy data from one table to another based on specified conditions using a simple and expressive syntax.
+This is a custom gem that extends ActiveRecord to enable the expression of SQL `INSERT INTO ... SELECT ...` queries in a more convenient way. It allows you to copy data from one table to another based on specified conditions using a simple and expressive syntax.
+
+SQL example of `INSERT INTO ... SELECT ...`:
+```
+INSERT INTO films SELECT * FROM tmp_films WHERE date_prod < '2004-05-07';
+
+
+```
 
 documentation:
 - MySQL: https://dev.mysql.com/doc/refman/8.0/en/insert-select.html
