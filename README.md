@@ -5,8 +5,6 @@ This is a custom gem that extends ActiveRecord to enable the expression of SQL `
 SQL example of `INSERT INTO ... SELECT ...`:
 ```
 INSERT INTO films SELECT * FROM tmp_films WHERE date_prod < '2004-05-07';
-
-
 ```
 
 documentation:

@@ -11,8 +11,35 @@ module InsertSelect
 
     included do
       class << self
-        def insert_select_from(relation, options = {})
-          InsertSelect::ActiveRecord::InsertSelectFrom.new(self, relation, mapping: options[:mapping], constant: options[:constant]).execute
+        #
+        # Copy data from the specified data source to the table of the model easily.
+        #
+        # @example Filter the columns to be copied
+        # 
+        # NewUser.insert_select_from(OldUser.select(:name))
+        # #=> INSERT INTO "new_users" ("name") SELECT "old_users"."name" FROM "old_users"
+        #
+        # To see more examples, please refer to the [README](https://github.com/a5-stable/insert_select#readme)
+        #
+        # @param [ActiveRecord::Relation] relation 
+        #        The data source to be copied.
+        #
+        # @param [Hash] mapping 
+        #        The column mapping hash. Specify the mapping when the column name is different between the source table and the destination table.
+        #        Usage: { source_column_name: :destination_column_name }
+        #
+        # @param [Hash] constant 
+        #        The constant value hash. You can specify constant values for columns.
+        #        Usage: { column_name: constant_value }
+        #        Please note that constant values take precedence over the mapping specification.
+        #
+        # @param returning 
+        #        The returning clause option (only for PostgreSQL connection).
+        #
+        # @return [ActiveRecord::Result] The result of the insert select operation.
+        #
+        def insert_select_from(relation, mapping: {}, constant: {}, returning: nil)
+          InsertSelect::ActiveRecord::InsertSelectFrom.new(self, relation, mapping: mapping, constant: constant, returning: returning).execute
         end
 
         def except(*columns)
@@ -22,7 +49,7 @@ module InsertSelect
     end
 
     class InsertSelectFrom
-      attr_reader :model, :connection, :relation, :adapter, :mapping, :constant, :returning
+      attr_reader :model, :connection, :relation, :adapter, :mapping, :constant
 
       def initialize(model, relation, mapping:, constant:, returning: nil)
         @model = model
