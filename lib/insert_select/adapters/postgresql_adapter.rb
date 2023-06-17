@@ -9,6 +9,8 @@ module InsertSelect
       def build_sql(builder)
         sql = super
         sql += " RETURNING #{builder.returning}" if builder.returning
+
+        sql
       end
     end
   end

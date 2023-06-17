@@ -36,7 +36,7 @@ module InsertSelect
 
       def execute
         sql = model.sanitize_sql_array([to_sql, *builder.constant_values])
-        connection.execute(sql)
+        connection.exec_insert_all(sql, "")
       end
 
       def to_sql
@@ -60,7 +60,7 @@ module InsertSelect
         case connection.adapter_name.to_s.downcase
         when /mysql/
           InsertSelect::Adapters::MysqlAdapter.new(table_name, connection)
-        when "PostgreSQL"
+        when /postgresql/
           InsertSelect::Adapters::PostgresqlAdapter.new(table_name, connection)
         when /sqlite/
           InsertSelect::Adapters::SqliteAdapter.new(table_name, connection)

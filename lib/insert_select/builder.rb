@@ -1,7 +1,7 @@
 module InsertSelect
   module ActiveRecord
     class Builder
-      attr_reader :relation, :constant, :mapping, :model, :constant_values
+      attr_reader :relation, :constant, :mapping, :model, :returning
 
       def initialize(insert_select_from)
         @connection = insert_select_from.connection
@@ -9,6 +9,7 @@ module InsertSelect
         @constant = insert_select_from.constant || {}
         @mapping = insert_select_from.mapping || {}
         @model = insert_select_from.model
+        @returning = insert_select_from.returning
       end
 
       def mapper
@@ -92,6 +93,22 @@ module InsertSelect
         constant_mapping.keys.each do |k, v|
           relation._select!("?")
           remove_select_values!(k)
+        end
+      end
+
+      def returning
+        return unless @returning
+
+        if @returning.is_a?(String)
+          @returning
+        else
+          Array( @returning ).map do |attribute|
+            if model.attribute_alias?(attribute)
+              "#{@connection.quote_column_name(model.attribute_alias(attribute))} AS #{@connection.quote_column_name(attribute)}"
+            else
+              @connection.quote_column_name(attribute)
+            end
+          end.join(",")
         end
       end
 
