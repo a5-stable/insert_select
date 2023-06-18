@@ -49,7 +49,7 @@ module InsertSelect
     end
 
     class InsertSelectFrom
-      attr_reader :model, :connection, :relation, :adapter, :mapping, :constant
+      attr_reader :model, :connection, :relation, :adapter, :mapping, :constant, :returning
 
       def initialize(model, relation, mapping:, constant:, returning: nil)
         @model = model
