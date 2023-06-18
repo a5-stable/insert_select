@@ -30,7 +30,7 @@ module InsertSelect
         #
         # @param [Hash] constant 
         #        The constant value hash. You can specify constant values for columns.
-        #        Usage: { column_name: constant_value }
+        #        Usage: { destination_column_name: constant_value }
         #        Please note that constant values take precedence over the mapping specification.
         #
         # @param returning 
