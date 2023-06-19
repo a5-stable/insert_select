@@ -67,6 +67,7 @@ RSpec.describe InsertSelect do
 
       expect(NewUserWithDifferentColumnName.count).to eq(6)
       expect(NewUserWithDifferentColumnName.pluck(:full_name)).to eq(["Dave", "Dee", "Dozy", "Beaky", "Mick", "Tich"])
+      expect(NewUserWithExtraColumn.pluck(:age)).to eq([20, 30, 40, 50, 60, 70])
     end
 
     it "can copy data with different column name by mapping with select clause" do
