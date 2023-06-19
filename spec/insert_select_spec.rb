@@ -78,6 +78,7 @@ RSpec.describe InsertSelect do
     end
 
     it "can copy data with constant value" do
+      NewUserWithExtraColumn.create_with(active: true).insert_select_from(OldUser)
       NewUserWithExtraColumn.insert_select_from(OldUser, constant: {active: true})
 
       expect(NewUserWithExtraColumn.count).to eq(6)

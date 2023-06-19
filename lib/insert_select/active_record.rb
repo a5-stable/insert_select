@@ -28,18 +28,13 @@ module InsertSelect
         #        The column mapping hash. Specify the mapping when the column name is different between the source table and the destination table.
         #        Usage: { source_column_name: :destination_column_name }
         #
-        # @param [Hash] constant 
-        #        The constant value hash. You can specify constant values for columns.
-        #        Usage: { column_name: constant_value }
-        #        Please note that constant values take precedence over the mapping specification.
-        #
         # @param returning 
         #        The returning clause option (only for PostgreSQL connection).
         #
         # @return [ActiveRecord::Result] The result of the insert select operation.
         #
-        def insert_select_from(relation, mapping: {}, constant: {}, returning: nil)
-          InsertSelect::ActiveRecord::InsertSelectFrom.new(self, relation, mapping: mapping, constant: constant, returning: returning).execute
+        def insert_select_from(relation, mapping: {}, returning: nil)
+          InsertSelect::ActiveRecord::InsertSelectFrom.new(self, relation, mapping: mapping, returning: returning).execute
         end
 
         def except(*columns)
@@ -49,20 +44,20 @@ module InsertSelect
     end
 
     class InsertSelectFrom
-      attr_reader :model, :connection, :relation, :adapter, :mapping, :constant, :returning
+      attr_reader :model, :connection, :relation, :adapter, :mapping, :returning
 
-      def initialize(model, relation, mapping:, constant:, returning: nil)
+      def initialize(model, relation, mapping:, returning: nil)
         @model = model
         @connection = model.connection
         @relation = relation
         @adapter = find_adapter(connection)
         @mapping = mapping
-        @constant = constant
         @returning = returning
       end
 
       def execute
         sql = model.sanitize_sql_array([to_sql, *builder.constant_values])
+        binding.irb
         connection.exec_insert_all(sql, "")
       end
 

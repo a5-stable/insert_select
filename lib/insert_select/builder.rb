@@ -1,12 +1,12 @@
 module InsertSelect
   module ActiveRecord
     class Builder
-      attr_reader :relation, :constant, :mapping, :model, :returning
+      attr_reader :relation, :mapping, :model, :returning, :insert_select_from, :connection
 
       def initialize(insert_select_from)
+        @insert_select_from = insert_select_from
         @connection = insert_select_from.connection
         @relation = insert_select_from.relation.all
-        @constant = insert_select_from.constant || {}
         @mapping = insert_select_from.mapping || {}
         @model = insert_select_from.model
         @returning = insert_select_from.returning
@@ -67,12 +67,33 @@ module InsertSelect
       end
 
       def into
-        return nil if insert_mapping.blank? && constant_mapping.blank?
+        return nil if insert_mapping.blank? && constant_mapping.blank? && constant_values.blank?
         "INTO #{model.quoted_table_name} (#{inserting_column_names.join(", ")})"
       end
 
+      def values_list
+        keys = model.column_names.map(&:to_sym)
+        types = keys.index_with { |key| model.type_for_attribute(key) }
+
+        values_list = insert_select_from.map_key_with_value do |key, value|
+          next value if Arel::Nodes::SqlLiteral === value
+          @connection.with_yaml_fallback(types[key].serialize(value))
+        end
+
+        connection.visitor.compile(Arel::Nodes::ValuesList.new(values_list))
+      end
+
+      def extract_types_from_columns_on(table_name, keys:)
+        columns = @connection.schema_cache.columns_hash(model.table_name)
+
+        # unknown_column = (keys - columns.keys).first
+        # raise UnknownAttributeError.new(model.new, unknown_column) if unknown_column
+
+        keys.index_with { |key| model.type_for_attribute(key) }
+      end
+
       def inserting_column_names
-        (insert_mapping.values + constant_mapping.keys).map {|k| @connection.quote_column_name(k) }
+        (insert_mapping.values + constant_mapping.keys + constant_values.keys).map {|k| @connection.quote_column_name(k) }
       end
 
       def relation_sql
@@ -80,7 +101,7 @@ module InsertSelect
       end
 
       def constant_values
-        constant.values
+        model.scope_attributes
       end
 
       def reselect_relation!
