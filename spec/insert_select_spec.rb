@@ -67,7 +67,7 @@ RSpec.describe InsertSelect do
 
       expect(NewUserWithDifferentColumnName.count).to eq(6)
       expect(NewUserWithDifferentColumnName.pluck(:full_name)).to eq(["Dave", "Dee", "Dozy", "Beaky", "Mick", "Tich"])
-      expect(NewUserWithExtraColumn.pluck(:age)).to eq([20, 30, 40, 50, 60, 70])
+      expect(NewUserWithDifferentColumnName.pluck(:age)).to eq([20, 30, 40, 50, 60, 70])
     end
 
     it "can copy data with different column name by mapping with select clause" do
@@ -121,7 +121,7 @@ RSpec.describe InsertSelect do
     end
 
     it "can copy data with constant value, mapping and select clause" do
-      NewUserWithDifferentColumn.create_with(age: 30).insert_select_from(OldUser.select(:name), mapping: {name: :full_name})
+      NewUserWithDifferentColumn.create_with(active: true).insert_select_from(OldUser.select(:name), mapping: {name: :full_name})
 
       expect(NewUserWithDifferentColumn.count).to eq(6)
       expect(NewUserWithDifferentColumn.pluck(:full_name)).to eq(["Dave", "Dee", "Dozy", "Beaky", "Mick", "Tich"])

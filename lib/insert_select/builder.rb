@@ -15,44 +15,22 @@ module InsertSelect
       def mapper
         @mapper ||= begin
           result = {}
-          insert_mapping = mapping.transform_keys(&:to_s)
-          mapping_column_names = mapping.keys
+          insert_mapping = {}
 
-          # selected & mapped
           if selected_column_names.present?
             selected_column_names.each do |column_name|
-              if mapping[column_name]
-                insert_mapping[column_name.to_s] = mapping[column_name]
-                mapping_column_names.delete(column_name)
-              else
-                insert_mapping[column_name.to_s] = column_name
-              end
+              insert_mapping[column_name.to_s] = mapping[column_name.to_sym] || column_name
+            end
+          elsif mapping.present? || model.scope_attributes.present?
+            @connection.columns(relation.table_name).each do |column|
+              insert_mapping[column.name.to_s] =  mapping[column.name.to_sym] || column.name
             end
           end
 
-          # not selected & mapped
-          if mapping_column_names.present?
-            @connection.columns(relation.table_name).map{|c|
-              insert_mapping[c.name.to_s] = mapping[c.name.to_sym] || c.name
-            }
-          end
-
-          # not selected & not mapped & constantized for insert mapping
-          constant_mapping = {}
-          if insert_mapping.blank? && constant.present?
-            @connection.columns(relation.table_name).map{|c|
-              insert_mapping[c.name.to_s] = c.name
-            }
-          end
-
-          # constantized for insert mapping & constant mapping
-          constant.each {|k, v|
-            insert_mapping.delete(k.to_s)
-            constant_mapping[k.to_s] = "\"#{v}\""
-          }
+          model.scope_attributes.keys.each {|column_name| insert_mapping.delete(column_name.to_s) }
 
           result[:insert_mapping] = insert_mapping
-          result[:constant_mapping] = constant_mapping
+          result[:constant_mapping] = model.scope_attributes || {}
 
           result
         end
@@ -67,33 +45,12 @@ module InsertSelect
       end
 
       def into
-        return nil if insert_mapping.blank? && constant_mapping.blank? && constant_values.blank?
+        return nil if insert_mapping.blank? && constant_mapping.blank?
         "INTO #{model.quoted_table_name} (#{inserting_column_names.join(", ")})"
       end
 
-      def values_list
-        keys = model.column_names.map(&:to_sym)
-        types = keys.index_with { |key| model.type_for_attribute(key) }
-
-        values_list = insert_select_from.map_key_with_value do |key, value|
-          next value if Arel::Nodes::SqlLiteral === value
-          @connection.with_yaml_fallback(types[key].serialize(value))
-        end
-
-        connection.visitor.compile(Arel::Nodes::ValuesList.new(values_list))
-      end
-
-      def extract_types_from_columns_on(table_name, keys:)
-        columns = @connection.schema_cache.columns_hash(model.table_name)
-
-        # unknown_column = (keys - columns.keys).first
-        # raise UnknownAttributeError.new(model.new, unknown_column) if unknown_column
-
-        keys.index_with { |key| model.type_for_attribute(key) }
-      end
-
       def inserting_column_names
-        (insert_mapping.values + constant_mapping.keys + constant_values.keys).map {|k| @connection.quote_column_name(k) }
+        (insert_mapping.values + constant_mapping.keys).map {|k| @connection.quote_column_name(k) }
       end
 
       def relation_sql
@@ -101,7 +58,7 @@ module InsertSelect
       end
 
       def constant_values
-        model.scope_attributes
+        constant_mapping.values
       end
 
       def reselect_relation!

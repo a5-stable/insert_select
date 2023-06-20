@@ -57,7 +57,6 @@ module InsertSelect
 
       def execute
         sql = model.sanitize_sql_array([to_sql, *builder.constant_values])
-        binding.irb
         connection.exec_insert_all(sql, "")
       end
 
