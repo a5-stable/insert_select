@@ -60,7 +60,7 @@ AnotherUser.insert_select_from(OldUser, mapping: { old_name: :another_name })
 
 ### Set a constant value
 ```ruby
-AnotherUser.insert_select_from(OldUser, mapping: { old_name: :another_name }, constant: { another_constant_column: "20" })
+AnotherUser.create_with(another_constant_column: "20").insert_select_from(OldUser, mapping: { old_name: :another_name })
 
 #=> INSERT INTO "another_users" ("another_name", "another_constant_column") SELECT "old_users"."name", "20" FROM "old_users"
 ```
