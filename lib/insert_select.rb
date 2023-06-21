@@ -7,6 +7,5 @@ require_relative "insert_select/errors"
 require_relative "insert_select/version"
 
 ActiveSupport.on_load(:active_record) do
-  extend InsertSelect::ActiveRecord
   ActiveRecord::Base.include(InsertSelect::ActiveRecord)
 end
