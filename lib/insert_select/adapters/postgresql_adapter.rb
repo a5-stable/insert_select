@@ -6,8 +6,11 @@ module InsertSelect
         @connection = connection
       end
 
-      def insert_select_from(relation, options = {})
-        super
+      def build_sql(builder)
+        sql = super
+        sql += " RETURNING #{builder.returning}" if builder.returning
+
+        sql
       end
     end
   end

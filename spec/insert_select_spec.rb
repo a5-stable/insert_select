@@ -41,13 +41,13 @@ RSpec.describe InsertSelect do
   # end
 
   describe "select insert" do
-    it "can copy all data with class" do
+    it "can copy all data with class name" do
       NewUserWithSameColumn.insert_select_from(OldUser)
 
       expect(NewUserWithSameColumn.count).to eq(6)
     end
 
-    it "only select" do
+    it "can select specific columns to be copied" do
       NewUserWithSameColumn.insert_select_from(OldUser.select(:name).all)
 
       expect(NewUserWithSameColumn.count).to eq(6)
@@ -55,14 +55,22 @@ RSpec.describe InsertSelect do
       expect(NewUserWithSameColumn.pluck(:age)).to eq(Array.new(6, nil))
     end
 
-    it "only mapping" do
+    it "can exclude specific columns to be copied by using except" do
+      NewUserWithSameColumn.insert_select_from(OldUser.except(:id).all)
+      NewUserWithSameColumn.insert_select_from(OldUser.except(:id).all) # not raise error because id is not unique
+
+      expect(NewUserWithSameColumn.count).to eq(12)
+    end
+
+    it "can copy data with different column name by mapping" do
       NewUserWithDifferentColumnName.insert_select_from(OldUser, mapping: {name: :full_name})
 
       expect(NewUserWithDifferentColumnName.count).to eq(6)
       expect(NewUserWithDifferentColumnName.pluck(:full_name)).to eq(["Dave", "Dee", "Dozy", "Beaky", "Mick", "Tich"])
+      expect(NewUserWithDifferentColumnName.pluck(:age)).to eq([20, 30, 40, 50, 60, 70])
     end
 
-    it "select & mapping" do
+    it "can copy data with different column name by mapping with select clause" do
       NewUserWithDifferentColumnName.insert_select_from(OldUser.select(:name).all, mapping: {name: :full_name})
 
       expect(NewUserWithDifferentColumnName.count).to eq(6)
@@ -70,8 +78,8 @@ RSpec.describe InsertSelect do
       expect(NewUserWithDifferentColumnName.pluck(:age)).to eq(Array.new(6, nil))
     end
 
-    it "only constant" do
-      NewUserWithExtraColumn.insert_select_from(OldUser, constant: {active: true})
+    it "can copy data with constant value" do
+      NewUserWithExtraColumn.create_with(active: true).insert_select_from(OldUser)
 
       expect(NewUserWithExtraColumn.count).to eq(6)
       expect(NewUserWithExtraColumn.pluck(:name)).to eq(["Dave", "Dee", "Dozy", "Beaky", "Mick", "Tich"])
@@ -79,16 +87,16 @@ RSpec.describe InsertSelect do
       expect(NewUserWithExtraColumn.pluck(:active)).to eq(Array.new(6, true))
     end
 
-    it "constant for exist column" do
-      NewUserWithSameColumn.insert_select_from(OldUser, constant: {name: "Jerry"})
+    it "can overwrite data with constant value" do
+      NewUserWithSameColumn.create_with(name: "Jerry").insert_select_from(OldUser)
 
       expect(NewUserWithSameColumn.count).to eq(6)
       expect(NewUserWithSameColumn.pluck(:name)).to eq(Array.new(6, "Jerry"))
       expect(NewUserWithSameColumn.pluck(:age)).to eq([20, 30, 40, 50, 60, 70])
     end
 
-    it "select & constant" do
-      NewUserWithExtraColumn.insert_select_from(OldUser.select(:name), constant: {active: true})
+    it "can copy data with constant value and select clause" do
+      NewUserWithExtraColumn.create_with(active: true).insert_select_from(OldUser.select(:name))
 
       expect(NewUserWithExtraColumn.count).to eq(6)
       expect(NewUserWithExtraColumn.pluck(:name)).to eq(["Dave", "Dee", "Dozy", "Beaky", "Mick", "Tich"])
@@ -96,24 +104,24 @@ RSpec.describe InsertSelect do
       expect(NewUserWithExtraColumn.pluck(:active)).to eq(Array.new(6, true))
     end
 
-    it "constant has priority over select" do
-      NewUserWithSameColumn.insert_select_from(OldUser.select(:name), constant: {name: "Jerry"})
+    it "can copy data with constant value" do
+      NewUserWithSameColumn.create_with(name: "Jerry").insert_select_from(OldUser.select(:name))
 
       expect(NewUserWithSameColumn.count).to eq(6)
       expect(NewUserWithSameColumn.pluck(:name)).to eq(Array.new(6, "Jerry"))
       expect(NewUserWithSameColumn.pluck(:age)).to eq(Array.new(6, nil))
     end
 
-    it "mapping & constant" do
-      NewUserWithDifferentColumnName.insert_select_from(OldUser.all, mapping: {name: :full_name}, constant: {age: 30})
+    it "can copy data with constant value and mapping" do
+      NewUserWithDifferentColumnName.create_with(age: 30).insert_select_from(OldUser.all, mapping: {name: :full_name})
 
       expect(NewUserWithDifferentColumnName.count).to eq(6)
       expect(NewUserWithDifferentColumnName.pluck(:full_name)).to eq(["Dave", "Dee", "Dozy", "Beaky", "Mick", "Tich"])
       expect(NewUserWithDifferentColumnName.pluck(:age)).to eq(Array.new(6, 30))
     end
 
-    it "mapping & select & constant" do
-      NewUserWithDifferentColumn.insert_select_from(OldUser.select(:name), mapping: {name: :full_name}, constant: {active: 30})
+    it "can copy data with constant value, mapping and select clause" do
+      NewUserWithDifferentColumn.create_with(active: true).insert_select_from(OldUser.select(:name), mapping: {name: :full_name})
 
       expect(NewUserWithDifferentColumn.count).to eq(6)
       expect(NewUserWithDifferentColumn.pluck(:full_name)).to eq(["Dave", "Dee", "Dozy", "Beaky", "Mick", "Tich"])
@@ -121,26 +129,12 @@ RSpec.describe InsertSelect do
       expect(NewUserWithDifferentColumn.pluck(:active)).to eq(Array.new(6, true))
     end
 
-    it "can filter data by where clause" do
+    it "can filter data to be copied by where clause" do
       NewUserWithSameColumn.insert_select_from(OldUser.where(age: 20))
 
       expect(NewUserWithSameColumn.count).to eq(1)
       expect(NewUserWithSameColumn.first.name).to eq("Dave")
       expect(NewUserWithSameColumn.first.age).to eq(20)
     end
-
-    # it "raises error when a number of column is different" do
-    #   expect { NewUserWithExtraColumn.insert_select_from(OldUser.all) }.to raise_error(InsertSelect::ColumnCountMisMatchError)
-    # end
-
-    # it "raises error when a number of column is different with select" do
-    #   NewUserWithSameColumn.insert_select_from(NewUserWithExtraColumn.select(:name, :age, :active))
-    # end
-
-    # it "raises error when a type of column is different" do
-    # end
-
-    # it "raises error when a column does not exists in mapping" do
-    # end
   end
 end

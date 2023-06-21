@@ -37,12 +37,14 @@ GEM
       rspec-support (~> 3.12.0)
     rspec-support (3.12.0)
     sqlite3 (1.6.3-x86_64-darwin)
+    sqlite3 (1.6.3-x86_64-linux)
     tzinfo (2.0.6)
       concurrent-ruby (~> 1.0)
 
 PLATFORMS
   x86_64-darwin-19
   x86_64-darwin-22
+  x86_64-linux
 
 DEPENDENCIES
   insert_select!

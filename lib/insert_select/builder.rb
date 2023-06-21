@@ -1,57 +1,36 @@
 module InsertSelect
   module ActiveRecord
     class Builder
-      attr_reader :relation, :constant, :mapping, :model, :constant_values
+      attr_reader :relation, :mapping, :model, :returning, :insert_select_from, :connection
 
       def initialize(insert_select_from)
+        @insert_select_from = insert_select_from
         @connection = insert_select_from.connection
         @relation = insert_select_from.relation.all
-        @constant = insert_select_from.constant || {}
         @mapping = insert_select_from.mapping || {}
         @model = insert_select_from.model
+        @returning = insert_select_from.returning
       end
 
       def mapper
         @mapper ||= begin
           result = {}
-          insert_mapping = mapping.transform_keys(&:to_s)
-          mapping_column_names = mapping.keys
+          insert_mapping = {}
 
-          # selected & mapped
           if selected_column_names.present?
             selected_column_names.each do |column_name|
-              if mapping[column_name]
-                insert_mapping[column_name.to_s] = mapping[column_name]
-                mapping_column_names.delete(column_name)
-              else
-                insert_mapping[column_name.to_s] = column_name
-              end
+              insert_mapping[column_name.to_s] = mapping[column_name.to_sym] || column_name
+            end
+          elsif mapping.present? || model.scope_attributes.present?
+            @connection.columns(relation.table_name).each do |column|
+              insert_mapping[column.name.to_s] =  mapping[column.name.to_sym] || column.name
             end
           end
 
-          # not selected & mapped
-          if mapping_column_names.present?
-            @connection.columns(relation.table_name).map{|c|
-              insert_mapping[c.name.to_s] = mapping[c.name.to_sym] || c.name
-            }
-          end
-
-          # not selected & not mapped & constantized for insert mapping
-          constant_mapping = {}
-          if insert_mapping.blank? && constant.present?
-            @connection.columns(relation.table_name).map{|c|
-              insert_mapping[c.name.to_s] = c.name
-            }
-          end
-
-          # constantized for insert mapping & constant mapping
-          constant.each {|k, v|
-            insert_mapping.delete(k.to_s)
-            constant_mapping[k.to_s] = "\"#{v}\""
-          }
+          model.scope_attributes.keys.each {|column_name| insert_mapping.delete(column_name.to_s) }
 
           result[:insert_mapping] = insert_mapping
-          result[:constant_mapping] = constant_mapping
+          result[:constant_mapping] = model.scope_attributes || {}
 
           result
         end
@@ -79,7 +58,7 @@ module InsertSelect
       end
 
       def constant_values
-        constant.values
+        constant_mapping.values
       end
 
       def reselect_relation!
@@ -92,6 +71,22 @@ module InsertSelect
         constant_mapping.keys.each do |k, v|
           relation._select!("?")
           remove_select_values!(k)
+        end
+      end
+
+      def returning
+        return unless @returning
+
+        if @returning.is_a?(String)
+          @returning
+        else
+          Array( @returning ).map do |attribute|
+            if model.attribute_alias?(attribute)
+              "#{@connection.quote_column_name(model.attribute_alias(attribute))} AS #{@connection.quote_column_name(attribute)}"
+            else
+              @connection.quote_column_name(attribute)
+            end
+          end.join(",")
         end
       end
 

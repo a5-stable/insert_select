@@ -11,27 +11,53 @@ module InsertSelect
 
     included do
       class << self
-        def insert_select_from(relation, options = {})
-          InsertSelect::ActiveRecord::InsertSelectFrom.new(self, relation, mapping: options[:mapping], constant: options[:constant]).execute
+        #
+        # Copy data from the specified data source to the table of the model easily.
+        #
+        # @example Filter the columns to be copied
+        # 
+        # NewUser.insert_select_from(OldUser.select(:name))
+        # #=> INSERT INTO "new_users" ("name") SELECT "old_users"."name" FROM "old_users"
+        #
+        # To see more examples, please refer to the [README](https://github.com/a5-stable/insert_select#readme)
+        #
+        # @param [ActiveRecord::Relation] relation 
+        #        The data source to be copied.
+        #
+        # @param [Hash] mapping 
+        #        The column mapping hash. Specify the mapping when the column name is different between the source table and the destination table.
+        #        Usage: { source_column_name: :destination_column_name }
+        #
+        # @param returning 
+        #        The returning clause option (only for PostgreSQL connection).
+        #
+        # @return [ActiveRecord::Result] The result of the insert select operation.
+        #
+        def insert_select_from(relation, mapping: {}, returning: nil)
+          InsertSelect::ActiveRecord::InsertSelectFrom.new(self, relation, mapping: mapping, returning: returning).execute
+        end
+
+        def except(*columns)
+          select( column_names - columns.map(&:to_s) )
         end
       end
     end
 
     class InsertSelectFrom
-      attr_reader :model, :connection, :relation, :adapter, :mapping, :constant
+      attr_reader :model, :connection, :relation, :adapter, :mapping, :returning
 
-      def initialize(model, relation, mapping:, constant:)
+      def initialize(model, relation, mapping:, returning: nil)
         @model = model
         @connection = model.connection
         @relation = relation
         @adapter = find_adapter(connection)
         @mapping = mapping
-        @constant = constant
+        @returning = returning
       end
 
       def execute
         sql = model.sanitize_sql_array([to_sql, *builder.constant_values])
-        connection.execute(sql)
+        connection.exec_insert_all(sql, "")
       end
 
       def to_sql
@@ -42,6 +68,12 @@ module InsertSelect
         @builder ||= Builder.new(self)
       end
 
+      def ensure_valid_options_for_connection!
+        if returning && !connection.supports_insert_returning?
+          raise ArgumentError, "#{connection.class} does not support :returning"
+        end
+      end
+
       private
 
       def find_adapter(connection)
@@ -49,7 +81,7 @@ module InsertSelect
         case connection.adapter_name.to_s.downcase
         when /mysql/
           InsertSelect::Adapters::MysqlAdapter.new(table_name, connection)
-        when "PostgreSQL"
+        when /postgresql/
           InsertSelect::Adapters::PostgresqlAdapter.new(table_name, connection)
         when /sqlite/
           InsertSelect::Adapters::SqliteAdapter.new(table_name, connection)

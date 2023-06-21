@@ -6,7 +6,7 @@ module InsertSelect
         @connection = connection
       end
 
-      def insert_select_from(relation, options = {})
+      def build_sql(builder)
         super
       end
     end

@@ -10,8 +10,6 @@ module InsertSelect
       end
 
       def build_sql(builder)
-        insert_mapping = builder.insert_mapping
-        constant_mapping = builder.constant_mapping
         into = builder.into
 
         if into.present?
