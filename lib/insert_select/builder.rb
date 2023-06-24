@@ -1,7 +1,7 @@
 module InsertSelect
   module ActiveRecord
     class Builder
-      attr_reader :relation, :mapping, :model, :returning, :insert_select_from, :connection
+      attr_reader :relation, :mapping, :model,:insert_select_from, :connection, :returning, :record_timestamps
 
       def initialize(insert_select_from)
         @insert_select_from = insert_select_from
@@ -10,6 +10,7 @@ module InsertSelect
         @mapping = insert_select_from.mapping || {}
         @model = insert_select_from.model
         @returning = insert_select_from.returning
+        @record_timestamps = insert_select_from.record_timestamps
       end
 
       def mapper
@@ -50,7 +51,9 @@ module InsertSelect
       end
 
       def inserting_column_names
-        (insert_mapping.values + constant_mapping.keys).map {|k| @connection.quote_column_name(k) }
+        column_names = insert_mapping.values + constant_mapping.keys
+        column_names += model.all_timestamp_attributes_in_model if record_timestamps
+        (column_names).map {|c| @connection.quote_column_name(c) }
       end
 
       def relation_sql

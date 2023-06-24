@@ -44,19 +44,21 @@ module InsertSelect
     end
 
     class InsertSelectFrom
-      attr_reader :model, :connection, :relation, :adapter, :mapping, :returning
+      attr_reader :model, :connection, :relation, :adapter, :mapping, :returning, :record_timestamps
 
-      def initialize(model, relation, mapping:, returning: nil)
+      def initialize(model, relation, mapping:, returning: nil, record_timestamps: model.record_timestamps)
         @model = model
         @connection = model.connection
         @relation = relation
         @adapter = find_adapter(connection)
         @mapping = mapping
         @returning = returning
+        @record_timestamps = record_timestamps
       end
 
       def execute
         sql = model.sanitize_sql_array([to_sql, *builder.constant_values])
+        puts sql
         connection.exec_insert_all(sql, "")
       end
 

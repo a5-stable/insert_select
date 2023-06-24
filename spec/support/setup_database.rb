@@ -6,28 +6,33 @@ class CreateAllTables < ActiveRecord::Migration[7.0]
     create_table(:old_users) do |t|
       t.string :name
       t.integer :age
+      t.timestamps
     end
 
     create_table(:new_user_with_same_columns) do |t|
       t.string :name
       t.integer :age
+      t.timestamps
     end
 
     create_table(:new_user_with_different_column_names) do |t|
       t.string :full_name
       t.integer :age
+      t.timestamps
     end
 
     create_table(:new_user_with_extra_columns) do |t|
       t.string :name
       t.integer :age
       t.boolean :active
+      t.timestamps
     end
 
     create_table(:new_user_with_different_columns) do |t|
       t.string :full_name
       t.string :email
       t.boolean :active
+      t.timestamps
     end
   end
 end
