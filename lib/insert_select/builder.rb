@@ -1,7 +1,7 @@
 module InsertSelect
   module ActiveRecord
     class Builder
-      attr_reader :relation, :mapping, :model, :returning, :insert_select_from, :connection
+      attr_reader :relation, :mapping, :model,:insert_select_from, :connection, :returning, :on_duplicate
 
       def initialize(insert_select_from)
         @insert_select_from = insert_select_from
@@ -10,6 +10,7 @@ module InsertSelect
         @mapping = insert_select_from.mapping || {}
         @model = insert_select_from.model
         @returning = insert_select_from.returning
+        @on_duplicate = insert_select_from.on_duplicate
       end
 
       def mapper

@@ -34,7 +34,7 @@ module InsertSelect
         # @return [ActiveRecord::Result] The result of the insert select operation.
         #
         def insert_select_from(relation, mapping: {}, returning: nil)
-          InsertSelect::ActiveRecord::InsertSelectFrom.new(self, relation, mapping: mapping, returning: returning).execute
+          InsertSelect::ActiveRecord::InsertSelectFrom.new(self, relation, mapping: mapping, on_duplicate: :skip, returning: returning).execute
         end
 
         def except(*columns)
@@ -44,20 +44,21 @@ module InsertSelect
     end
 
     class InsertSelectFrom
-      attr_reader :model, :connection, :relation, :adapter, :mapping, :returning
+      attr_reader :model, :connection, :relation, :adapter, :mapping, :returning, :on_duplicate
 
-      def initialize(model, relation, mapping:, returning: nil)
+      def initialize(model, relation, mapping:, on_duplicate:, returning: nil)
         @model = model
         @connection = model.connection
         @relation = relation
         @adapter = find_adapter(connection)
         @mapping = mapping
         @returning = returning
+        @on_duplicate = on_duplicate
       end
 
       def execute
         sql = model.sanitize_sql_array([to_sql, *builder.constant_values])
-        connection.exec_insert_all(sql, "")
+        connection.exec_insert_all(sql, "Bulk Insert")
       end
 
       def to_sql

@@ -7,7 +7,9 @@ module InsertSelect
       end
 
       def build_sql(builder)
-        super
+        sql = super
+
+        sql
       end
     end
   end

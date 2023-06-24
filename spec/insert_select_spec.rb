@@ -136,5 +136,10 @@ RSpec.describe InsertSelect do
       expect(NewUserWithSameColumn.first.name).to eq("Dave")
       expect(NewUserWithSameColumn.first.age).to eq(20)
     end
+
+    it "can skip duplicate data" do
+      OldUser.insert_select_from(OldUser)
+      OldUser.insert_select_from(OldUser.where(age: 20))
+    end
   end
 end
