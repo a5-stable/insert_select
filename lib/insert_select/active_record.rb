@@ -37,6 +37,10 @@ module InsertSelect
           InsertSelect::ActiveRecord::InsertSelectFrom.new(self, relation, mapping: mapping, on_duplicate: :skip, returning: returning).execute
         end
 
+        def insert_select_from!(relation, mapping: {}, returning: nil)
+          InsertSelect::ActiveRecord::InsertSelectFrom.new(self, relation, mapping: mapping, on_duplicate: nil, returning: returning).execute
+        end
+
         def except(*columns)
           select( column_names - columns.map(&:to_s) )
         end

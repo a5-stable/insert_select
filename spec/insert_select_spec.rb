@@ -137,9 +137,12 @@ RSpec.describe InsertSelect do
       expect(NewUserWithSameColumn.first.age).to eq(20)
     end
 
-    it "can skip duplicate data" do
-      OldUser.insert_select_from(OldUser)
-      OldUser.insert_select_from(OldUser.where(age: 20))
+    it "can skip duplicate data with not bang method " do
+      expect { OldUser.insert_select_from(OldUser) }.not_to raise_error
+      expect { OldUser.insert_select_from(OldUser.where(age: 20)) }.not_to raise_error
+
+      expect { OldUser.insert_select_from!(OldUser) }.to raise_error(ActiveRecord::RecordNotUnique)
+      expect { OldUser.insert_select_from!(OldUser.where(age: 20)) }.to raise_error(ActiveRecord::RecordNotUnique)
     end
   end
 end

@@ -16,8 +16,7 @@ module InsertSelect
           stmt << " #{builder.relation_sql}"
 
           if builder.on_duplicate == :skip
-            stmt << "WHERE 1 " if builder.relation.where_clause.blank?
-            stmt << " ON CONFLICT DO NOTHING" 
+            stmt << " ON DUPLICATE KEY UPDATE `id`= VALUES(`id`) " 
           end
         else
           quoted_table_name = @connection.quote_table_name(table_name)
@@ -25,8 +24,7 @@ module InsertSelect
           stmt << " #{builder.relation_sql}"
 
           if builder.on_duplicate == :skip
-            stmt << " WHERE 1" if builder.relation.where_clause.blank?
-            stmt << " ON CONFLICT DO NOTHING" 
+            stmt << " ON DUPLICATE KEY UPDATE `id`= VALUES(`id`) " 
           end
         end
 

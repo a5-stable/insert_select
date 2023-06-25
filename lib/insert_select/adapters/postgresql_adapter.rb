@@ -8,12 +8,9 @@ module InsertSelect
 
       def build_sql(builder)
         sql = super
-        sql += " RETURNING #{builder.returning}" if builder.returning
 
-        if builder.on_duplicate == :skip
-          stmt << "WHERE 1 " if builder.relation.where_clause.blank?
-          stmt << " ON CONFLICT DO NOTHING" 
-        end
+        sql << " RETURNING #{builder.returning}" if builder.returning
+        sql << " ON CONFLICT DO NOTHING" if builder.on_duplicate == :skip
 
         sql
       end
