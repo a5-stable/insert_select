@@ -10,6 +10,11 @@ module InsertSelect
         sql = super
         sql += " RETURNING #{builder.returning}" if builder.returning
 
+        if builder.on_duplicate == :skip
+          stmt << "WHERE 1 " if builder.relation.where_clause.blank?
+          stmt << " ON CONFLICT DO NOTHING" 
+        end
+
         sql
       end
     end
