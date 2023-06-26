@@ -139,10 +139,12 @@ RSpec.describe InsertSelect do
 
     it "can skip duplicate data with not bang method " do
       expect { OldUser.insert_select_from(OldUser) }.not_to raise_error
-      expect { OldUser.insert_select_from(OldUser.where(age: 20)) }.not_to raise_error
+      expect { OldUser.insert_select_from(OldUser.where(age: 20)) }.not_to raise_error # with where clause
+      expect { OldUser.insert_select_from(OldUser.limit(5)) }.not_to raise_error # wirh limit clause
 
       expect { OldUser.insert_select_from!(OldUser) }.to raise_error(ActiveRecord::RecordNotUnique)
-      expect { OldUser.insert_select_from!(OldUser.where(age: 20)) }.to raise_error(ActiveRecord::RecordNotUnique)
+      expect { OldUser.insert_select_from!(OldUser.where(age: 20)) }.to raise_error(ActiveRecord::RecordNotUnique) # with where clause
+      expect { OldUser.insert_select_from!(OldUser.limit(5)) }.to raise_error(ActiveRecord::RecordNotUnique) # wirh limit clause
     end
   end
 end

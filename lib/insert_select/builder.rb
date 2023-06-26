@@ -91,6 +91,10 @@ module InsertSelect
         end
       end
 
+      def returning?
+        @returning.present?
+      end
+
       private
 
       def remove_select_values!(column_name)
