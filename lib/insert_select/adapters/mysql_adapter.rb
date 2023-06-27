@@ -7,7 +7,13 @@ module InsertSelect
       end
 
       def build_sql(builder)
-        super
+        stmt = super
+
+        if builder.on_duplicate == :skip
+          stmt << " ON DUPLICATE KEY UPDATE `id`= VALUES(`id`) " 
+        end
+
+        stmt
       end
     end
   end

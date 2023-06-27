@@ -7,10 +7,12 @@ module InsertSelect
       end
 
       def build_sql(builder)
-        sql = super
-        sql += " RETURNING #{builder.returning}" if builder.returning
+        stmt = super
 
-        sql
+        stmt << " ON CONFLICT DO NOTHING" if builder.on_duplicate == :skip
+        stmt << " RETURNING #{builder.returning}" if builder.returning?
+
+        stmt
       end
     end
   end
