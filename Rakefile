@@ -5,4 +5,5 @@ require "rspec/core/rake_task"
 
 RSpec::Core::RakeTask.new(:spec)
 
-task default: :spec
+task spec: ["spec:mysql2", "spec:postgresql", "spec:sqlite3"]
+task default: [:spec]
