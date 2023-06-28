@@ -2,7 +2,8 @@
 [![Ruby](https://github.com/a5-stable/insert_select/actions/workflows/ruby.yml/badge.svg)](https://github.com/a5-stable/insert_select/actions/workflows/ruby.yml)
 ![Code Climate](https://codeclimate.com/github/a5-stable/insert_select.png)
 
-This is a custom gem that extends ActiveRecord to enable the expression of SQL `INSERT INTO ... SELECT ...` queries in a more convenient way. It allows you to copy data from one table to another based on specified conditions using a simple and expressive syntax.
+This is a custom gem that extends ActiveRecord to enable the expression of SQL `INSERT INTO ... SELECT ...` queries in a more convenient way.  
+It allows you to copy data from one table to another based on specified conditions using a simple and expressive syntax.
 
 SQL example of `INSERT INTO ... SELECT ...`:
 ```
