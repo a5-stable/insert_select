@@ -1,0 +1,15 @@
+postgresql:
+  adapter: postgresql
+  host: localhost
+  database: insert_select_test
+  username: postgres
+  password: password
+mysql2:
+  adapter: mysql2
+  host: 127.0.0.1
+  database: insert_select_test
+  username: root
+  password: password
+sqlite3:
+  adapter: sqlite3
+  database: ':memory:'

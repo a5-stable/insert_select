@@ -1,4 +1,6 @@
-ActiveRecord::Base.configurations = {'test' => {adapter: ENV.fetch("ADAPTER_NAME"), database: ENV.fetch("DATABASE_NAME") } }
+database_yml = File.expand_path("database.yml", __dir__)
+configs = YAML.load_file(database_yml)
+ActiveRecord::Base.configurations = configs
 ActiveRecord::Base.establish_connection :test
 
 class CreateAllTables < ActiveRecord::Migration[7.0]
