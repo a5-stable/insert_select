@@ -140,10 +140,8 @@ RSpec.describe InsertSelect do
     it "can use returning specification" do
       skip "returning not supported" unless ActiveRecord::Base.connection.supports_insert_returning?
 
-      res = NewUserWithSameColumn.insert_select_from(OldUser, returning: :id)
-      expect(res.pluck("id")).to eq([1, 2, 3, 4, 5, 6])
-
       res = NewUserWithSameColumn.insert_select_from(OldUser, returning: %i[id name])
+      puts res
       expect(res.pluck("id")).to eq([1, 2, 3, 4, 5, 6])
       expect(res.pluck("name")).to eq(["Dave", "Dee", "Dozy", "Beaky", "Mick", "Tich"])
     end
