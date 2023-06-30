@@ -14,4 +14,6 @@ namespace :spec do
     end
   end
 end
+
+task spec: ["spec:postgresql", "spec:mysql2", "spec:sqlite3"]
 task default: :spec
