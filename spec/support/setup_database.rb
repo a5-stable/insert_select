@@ -1,5 +1,7 @@
-ActiveRecord::Base.configurations = {'test' => {adapter: 'sqlite3', database: ':memory:'}}
-ActiveRecord::Base.establish_connection :test
+database_yml = File.expand_path("database.yml", __dir__)
+configs = YAML.load_file(database_yml)
+ActiveRecord::Base.configurations = configs
+ActiveRecord::Base.establish_connection(ENV["ADAPTER_NAME"].to_sym)
 
 class CreateAllTables < ActiveRecord::Migration[7.0]
   def self.up

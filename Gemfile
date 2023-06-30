@@ -9,3 +9,5 @@ gem "rake", "~> 13.0"
 
 gem "rspec", "~> 3.0"
 gem "sqlite3"
+gem "mysql2"
+gem "pg"
