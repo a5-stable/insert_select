@@ -1,4 +1,4 @@
-ActiveRecord::Base.configurations = {'test' => {adapter: 'sqlite3', database: ':memory:'}}
+ActiveRecord::Base.configurations = {'test' => {adapter: ENV.fetch("ADAPTER_NAME"), database: ENV.fetch("DATABASE_NAME") } }
 ActiveRecord::Base.establish_connection :test
 
 class CreateAllTables < ActiveRecord::Migration[7.0]
