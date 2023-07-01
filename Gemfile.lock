@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    insert_select (0.1.0)
+    insert_select (1.0.0)
       activerecord
 
 GEM
