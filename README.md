@@ -79,8 +79,23 @@ NewUser.insert_select_from(OldUser, returning: [:id])
 
 #=> INSERT INTO "new_users" SELECT "old_users".* FROM "old_users" RETURNING "id"
 ```
+### bang method
+In default, any duplicated records are skipped in the `insert_select_from` method.
+If you want to raise an error when a duplicated record is found, use the bang method.
 
-Other options, which are enabled in [`insert_all`](https://www.rubydoc.info/github/rails/rails/ActiveRecord%2FPersistence%2FClassMethods:insert_all) should be also supported, but are not yet implemented.
+Assume that `id` is a primary key.
+This example does not raise an `ActiveRecord::RecordNotUnique` exception and no record is inserted.
+```ruby
+User.insert_select_from(User)
+```
+
+This example raises an `ActiveRecord::RecordNotUnique` exception.
+```ruby
+User.insert_select_from!(User)
+
+#=> ActiveRecord::RecordNotUnique (SQLite3::ConstraintException: UNIQUE constraint failed: users.id)
+```
+
 
 ## Development
 
