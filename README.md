@@ -34,7 +34,7 @@ gem install insert_select
   
 ## Usage
 
-### Copy all data from OldUser to NewUser
+#### Copy all data from OldUser to NewUser
 
 ```ruby
 NewUser.insert_select_from(OldUser)
@@ -42,7 +42,7 @@ NewUser.insert_select_from(OldUser)
 #=> INSERT INTO "new_users" SELECT "old_users".* FROM "old_users"
 ```
 
-### Filter the columns to be copied
+#### Filter the columns to be copied
 
 ```ruby
 NewUser.insert_select_from(OldUser.select(:name))
@@ -50,7 +50,7 @@ NewUser.insert_select_from(OldUser.select(:name))
 #=> INSERT INTO "new_users" ("name") SELECT "old_users"."name" FROM "old_users"
 ```
 
-### Copy data between different column names
+#### Copy data between different column names
 
 You can specify column name mappings between tables.
 ```ruby
@@ -59,27 +59,27 @@ AnotherUser.insert_select_from(OldUser, mapping: { old_name: :another_name })
 #=> INSERT INTO "another_users" ("another_name") SELECT "old_users"."name" FROM "old_users"
 ```
 
-### Set a constant value
+#### Set a constant value
 ```ruby
 AnotherUser.create_with(another_constant_column: "20").insert_select_from(OldUser, mapping: { old_name: :another_name })
 
 #=> INSERT INTO "another_users" ("another_name", "another_constant_column") SELECT "old_users"."name", "20" FROM "old_users"
 ```
 
-### Use a WHERE clause to filter the data
+#### Use a WHERE clause to filter the data
 ```ruby
 NewUser.insert_select_from(OldUser.where("age > ?", 20))
 
 #=> INSERT INTO "new_users" SELECT "old_users".*, FROM "old_users" WHERE ("age" > 20)
 ```
 
-### Use the RETURNING clause (only for PostgreSQL connection)
+#### Use the RETURNING clause (only for PostgreSQL connection)
 ```ruby
 NewUser.insert_select_from(OldUser, returning: [:id])
 
 #=> INSERT INTO "new_users" SELECT "old_users".* FROM "old_users" RETURNING "id"
 ```
-### bang method
+#### bang method
 In default, any duplicated records are skipped in the `insert_select_from` method.
 If you want to raise an error when a duplicated record is found, use the bang method.
 
