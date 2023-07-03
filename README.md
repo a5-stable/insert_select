@@ -79,7 +79,7 @@ NewUser.insert_select_from(OldUser, returning: [:id])
 
 #=> INSERT INTO "new_users" SELECT "old_users".* FROM "old_users" RETURNING "id"
 ```
-#### bang method
+#### Bang method
 In default, any duplicated records are skipped in the `insert_select_from` method.
 If you want to raise an error when a duplicated record is found, use the bang method.
 
