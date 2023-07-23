@@ -59,7 +59,10 @@ module InsertSelect
       end
 
       def constant_values
-        constant_mapping.values
+        constant_mapping.map do |k, v|
+          type = model.type_for_attribute(k.to_s)
+          type.serialize(v)
+        end
       end
 
       def reselect_relation!
