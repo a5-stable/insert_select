@@ -1,7 +1,7 @@
 database_yml = File.expand_path("database.yml", __dir__)
 configs = YAML.load_file(database_yml)
 ActiveRecord::Base.configurations = configs
-ActiveRecord::Base.establish_connection(ENV["ADAPTER_NAME"].to_sym)
+ActiveRecord::Base.establish_connection(ENV["ADAPTER_NAME"]&.to_sym || :sqlite3)
 
 class CreateAllTables < ActiveRecord::Migration[7.0]
   def self.up
