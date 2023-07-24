@@ -10,7 +10,7 @@ SQL example of `INSERT INTO ... SELECT ...`:
 INSERT INTO films SELECT * FROM tmp_films WHERE date_prod < '2004-05-07';
 ```
 
-documentation:
+documentation for the query: 
 - MySQL: https://dev.mysql.com/doc/refman/8.0/en/insert-select.html
 - PostgreSQL: https://www.postgresql.org/docs/current/sql-insert.html
 
