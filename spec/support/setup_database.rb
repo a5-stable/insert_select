@@ -37,16 +37,20 @@ end
 ActiveRecord::Migration.verbose = false
 CreateAllTables.up
 
-class OldUser < ActiveRecord::Base
+class ApplicationRecord < ActiveRecord::Base
+  self.abstract_class = true
 end
 
-class NewUserWithSameColumn < ActiveRecord::Base
+class OldUser < ApplicationRecord
 end
 
-class NewUserWithExtraColumn < ActiveRecord::Base
+class NewUserWithSameColumn < ApplicationRecord
 end
 
-class NewUserWithDifferentColumnName < ActiveRecord::Base
+class NewUserWithExtraColumn < ApplicationRecord
+end
+
+class NewUserWithDifferentColumnName < ApplicationRecord
 end
 
 class NewUserWithDifferentColumn < ActiveRecord::Base
